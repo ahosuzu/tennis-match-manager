@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Tennis Match Manager - 第10.5版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>🎾 Tennis Match Manager</h1>
+
+<!-- 集合写真 -->
+<div class="section">
+    <h2>📸 集合写真</h2>
+    <button id="takeGroupPhotoBtn" onclick="openGroupCamera()">集合写真を撮る📸</button>
+    <div id="groupPhotoContainer">
+        <img id="groupPhoto" class="group-photo" style="display:none;">
+    </div>
+</div>
+
+<!-- イベント設定 -->
+<div class="section">
+    <h2>イベント名</h2>
+    <input id="eventName" placeholder="イベント名を入力">
+    <button id="newEventBtn">新しいイベントを始める！✨</button>
+</div>
+
+<!-- 人数選択 -->
+<div class="section">
+    <h2>人数を選ぶ</h2>
+    <select id="playerCount">
+        <option value="5">5名（1コート）</option>
+        <option value="6">6名（1コート）</option>
+        <option value="10">10名（2コート）</option>
+        <option value="11">11名（2コート）</option>
+        <option value="12">12名（2コート）</option>
+    </select>
+</div>
+
+<!-- メンバー登録 -->
+<div class="section">
+    <h2>メンバー登録</h2>
+    <div id="memberInputs"></div>
+    <button id="applyMembersBtn">メンバー決定！試合スタート🔥</button>
+</div>
+
+<!-- 試合カード -->
+<div class="section">
+    <h2>試合一覧</h2>
+    <button id="shuffleBtn">シャッフル！🔄（試合開始前のみ）</button>
+    <button id="addMatchBtn">追加試合つくる✨</button>
+    <div id="matchTable"></div>
+</div>
+
+<!-- ランキング -->
+<div class="section">
+    <h2>ランキング（平均ゲーム数）</h2>
+    <div id="rankingArea"></div>
+</div>
+
+<!-- 結果保存 -->
+<div class="section">
+    <button id="saveImageBtn" class="save-btn">結果を画像で保存💾</button>
+</div>
+
+<!-- カメラオーバーレイ -->
+<div id="cameraArea" style="display:none;">
+    <div class="camera-inner">
+        <button id="closeCameraBtn" class="camera-close">×</button>
+
+        <video id="cameraVideo" autoplay playsinline></video>
+        <img id="cameraPreview" style="display:none;">
+        <div id="cameraCountdown" class="camera-countdown" style="display:none;"></div>
+
+        <div class="cameraControls">
+            <button id="captureBtn">5秒タイマー撮影</button>
+            <button id="retakeBtn" style="display:none;">取り直し</button>
+            <button id="confirmBtn" style="display:none;">決定</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script src="js/template.js" defer></script>
+<script src="js/ui.js" defer></script>
+<script src="js/app.js" defer></script>
+<script src="js/camera.js" defer></script>
+
+</body>
+</html>
