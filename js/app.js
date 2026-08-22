@@ -98,10 +98,16 @@ function onShuffle() {
     updateRanking();
 }
 
-/* スコア保存（プルダウン） */
+/* スコア保存（入力2つから「x-y」を作る） */
 function saveResult(matchIndex, court) {
-    const select = document.getElementById(`score_${court}_${matchIndex}`);
-    const score = select.value;
+    const scoreBaseId = `score_${court}_${matchIndex}`;
+    const aInput = document.getElementById(`${scoreBaseId}_A`);
+    const bInput = document.getElementById(`${scoreBaseId}_B`);
+
+    const a = aInput.value;
+    const b = bInput.value;
+
+    const score = (a !== "" && b !== "") ? `${a}-${b}` : "";
     matchResults[matchIndex][court] = score;
 
     const resultText = document.getElementById(`resultText_${court}_${matchIndex}`);
@@ -226,10 +232,49 @@ function renderMatchCards(template, members, matchResults) {
             const block = document.createElement("div");
             block.className = "match-block";
 
-            const scoreId = `score_${court}_${matchIndex}`;
+            const scoreBaseId = `score_${court}_${matchIndex}`;
 
             block.innerHTML = `
                 <div><strong>${court}コート</strong></div>
 
-                <div>
-                    <span class="teamA">${team1
+                <div class="teams">
+                    <span class="teamA">${team1.join("・")}</span>
+                    <span class="vs">vs</span>
+                    <span class="teamB">${team2.join("・")}</span>
+                </div>
+
+                <div class="score-input">
+                    <input id="${scoreBaseId}_A" type="number" min="0" max="7">
+                    <span> - </span>
+                    <input id="${scoreBaseId}_B" type="number" min="0" max="7">
+                    <button type="button" onclick="saveResult(${matchIndex}, '${court}')">保存</button>
+                    <span id="resultText_${court}_${matchIndex}" class="result-text">結果：-</span>
+                </div>
+            `;
+
+            card.appendChild(block);
+        });
+
+        container.appendChild(card);
+    });
+}
+
+/* 追加試合（必要なら既存ロジックに合わせて実装） */
+function onAddMatch() {
+    // ここは既存のテンプレート生成ロジックに合わせて拡張する前提で空にしてあります。
+    // もし「追加試合」機能を使うなら、currentTemplate に1行追加し、
+    // matchResults にも対応する要素を追加してから renderMatchCards を再呼び出ししてください。
+}
+
+/* 結果画像保存（既存の html2canvas ロジックに合わせて実装） */
+function onSaveImage() {
+    const target = document.getElementById("matchTable");
+    if (!target) return;
+
+    html2canvas(target).then(canvas => {
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = "tennis-match-results.png";
+        link.click();
+    });
+}
