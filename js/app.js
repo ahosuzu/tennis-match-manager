@@ -1,8 +1,16 @@
+// js/app.js
 let members = {};
 let matchResults = [];
 let currentTemplate = [];
 let playerCount = 5;
 let hasMatchStarted = false;
+
+/* 常連候補（必要に応じて編集可） */
+const REGULAR_NAMES = [
+    "たけし", "しんじ", "まさと", "けんじ",
+    "こうじ", "さとる", "ゆうき", "ひろし",
+    "なおき", "けい"
+];
 
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("playerCount").onchange = onPlayerCountChange;
@@ -21,7 +29,7 @@ function onPlayerCountChange() {
     createMemberInputs(playerCount);
 }
 
-/* メンバー入力欄生成（常連名なし） */
+/* メンバー入力欄生成（常連補助） */
 function createMemberInputs(count) {
     const container = document.getElementById("memberInputs");
     container.innerHTML = "";
@@ -35,7 +43,7 @@ function createMemberInputs(count) {
 
         const input = document.createElement("input");
         input.id = `member${i}`;
-        input.placeholder = `メンバー${i}`;
+        input.placeholder = REGULAR_NAMES[i - 1] || `メンバー${i}`;
 
         row.appendChild(label);
         row.appendChild(input);
@@ -69,7 +77,7 @@ function onApplyMembers() {
     members = {};
     for (let i = 1; i <= playerCount; i++) {
         const v = document.getElementById(`member${i}`).value;
-        members[i] = v || `メンバー${i}`;
+        members[i] = v || (REGULAR_NAMES[i - 1] || `${i}番`);
     }
 
     currentTemplate = getTemplate(playerCount);
@@ -98,16 +106,10 @@ function onShuffle() {
     updateRanking();
 }
 
-/* スコア保存（入力2つから「x-y」を作る） */
+/* スコア保存（プルダウン） */
 function saveResult(matchIndex, court) {
-    const scoreBaseId = `score_${court}_${matchIndex}`;
-    const aInput = document.getElementById(`${scoreBaseId}_A`);
-    const bInput = document.getElementById(`${scoreBaseId}_B`);
-
-    const a = aInput.value;
-    const b = bInput.value;
-
-    const score = (a !== "" && b !== "") ? `${a}-${b}` : "";
+    const select = document.getElementById(`score_${court}_${matchIndex}`);
+    const score = select.value;
     matchResults[matchIndex][court] = score;
 
     const resultText = document.getElementById(`resultText_${court}_${matchIndex}`);
@@ -152,7 +154,10 @@ function updateRanking() {
 
             const [g1, g2] = score.split("-").map(Number);
             const text = row[ci];
-            const teams = text.split("vs");
+
+            // ★★★ ここが今回の本質的修正 ★★★
+            const teams = text.split(" vs ");
+
             const team1 = teams[0].split("・").map(n => parseInt(n));
             const team2 = teams[1].split("・").map(n => parseInt(n));
 
@@ -209,7 +214,7 @@ function renderRanking(ranking) {
     });
 }
 
-/* 試合カード描画（青 vs 赤色付け） */
+/* 試合カード描画（ダブルス＋プルダウン＋写真） */
 function renderMatchCards(template, members, matchResults) {
     const container = document.getElementById("matchTable");
     container.innerHTML = "";
@@ -222,7 +227,9 @@ function renderMatchCards(template, members, matchResults) {
         row.forEach((text, ci) => {
             const court = ci === 0 ? "A" : "B";
 
-            const teams = text.split("vs");
+            // ★★★ ここが今回の本質的修正 ★★★
+            const teams = text.split(" vs ");
+
             const team1Nums = teams[0].split("・").map(n => parseInt(n));
             const team2Nums = teams[1].split("・").map(n => parseInt(n));
 
@@ -232,24 +239,32 @@ function renderMatchCards(template, members, matchResults) {
             const block = document.createElement("div");
             block.className = "match-block";
 
-            const scoreBaseId = `score_${court}_${matchIndex}`;
+            const scoreId = `score_${court}_${matchIndex}`;
 
             block.innerHTML = `
                 <div><strong>${court}コート</strong></div>
+                <div>${team1.join("・")} vs ${team2.join("・")}</div>
 
-                <div class="teams">
-                    <span class="teamA">${team1.join("・")}</span>
-                    <span class="vs">vs</span>
-                    <span class="teamB">${team2.join("・")}</span>
-                </div>
+                <select id="${scoreId}" onchange="saveResult(${matchIndex}, '${court}')">
+                    <option value="">スコアを選択</option>
+                    <option value="0-4">0-4</option>
+                    <option value="1-3">1-3</option>
+                    <option value="2-2">2-2</option>
+                    <option value="2-3">2-3</option>
+                    <option value="3-2">3-2</option>
+                    <option value="3-1">3-1</option>
+                    <option value="4-0">4-0</option>
+                </select>
 
-                <div class="score-input">
-                    <input id="${scoreBaseId}_A" type="number" min="0" max="7">
-                    <span> - </span>
-                    <input id="${scoreBaseId}_B" type="number" min="0" max="7">
-                    <button type="button" onclick="saveResult(${matchIndex}, '${court}')">保存</button>
-                    <span id="resultText_${court}_${matchIndex}" class="result-text">結果：-</span>
-                </div>
+                <div id="resultText_${court}_${matchIndex}">結果：-</div>
+
+                <button onclick="openCamera(${matchIndex}, '${court}')">
+                    ${court}コート写真撮影（5秒タイマー）
+                </button>
+
+                <img class="matchPhotoPreview"
+                     data-match-index="${matchIndex}"
+                     data-court="${court}">
             `;
 
             card.appendChild(block);
@@ -259,22 +274,59 @@ function renderMatchCards(template, members, matchResults) {
     });
 }
 
-/* 追加試合（必要なら既存ロジックに合わせて実装） */
+/* 追加試合作成（ダブルス） */
 function onAddMatch() {
-    // ここは既存のテンプレート生成ロジックに合わせて拡張する前提で空にしてあります。
-    // もし「追加試合」機能を使うなら、currentTemplate に1行追加し、
-    // matchResults にも対応する要素を追加してから renderMatchCards を再呼び出ししてください。
+    const playCounts = {};
+    for (let i = 1; i <= playerCount; i++) {
+        playCounts[i] = 0;
+    }
+
+    currentTemplate.forEach((row) => {
+        const courts = row.length === 1 ? ["A"] : ["A", "B"];
+
+        courts.forEach((court, ci) => {
+            const text = row[ci];
+            const teams = text.split(" vs ");
+            const team1 = teams[0].split("・").map(n => parseInt(n));
+            const team2 = teams[1].split("・").map(n => parseInt(n));
+
+            [...team1, ...team2].forEach(num => playCounts[num]++);
+        });
+    });
+
+    const sorted = Object.entries(playCounts)
+        .sort((a, b) => a[1] - b[1])
+        .map(([num]) => parseInt(num));
+
+    const selected = sorted.slice(0, 4);
+
+    const newMatch = [
+        `${selected[0]}・${selected[1]} vs ${selected[2]}・${selected[3]}`
+    ];
+
+    currentTemplate.push(newMatch);
+    matchResults.push({ A: "" });
+
+    renderMatchCards(currentTemplate, members, matchResults);
+    updateRanking();
 }
 
-/* 結果画像保存（既存の html2canvas ロジックに合わせて実装） */
+/* 結果保存 */
 function onSaveImage() {
-    const target = document.getElementById("matchTable");
-    if (!target) return;
-
-    html2canvas(target).then(canvas => {
+    html2canvas(document.body).then(canvas => {
         const link = document.createElement("a");
-        link.href = canvas.toDataURL("image/png");
-        link.download = "tennis-match-results.png";
+        link.download = "tennis_result.png";
+        link.href = canvas.toDataURL();
         link.click();
     });
+}
+
+/* テンプレート取得（template.js はそのまま利用） */
+function getTemplate(playerCount) {
+    if (playerCount === 10) return TEMPLATE_10;
+    if (playerCount === 11) return TEMPLATE_11;
+    if (playerCount === 12) return TEMPLATE_12;
+    if (playerCount === 5)  return TEMPLATE_5;
+    if (playerCount === 6)  return TEMPLATE_6;
+    return [];
 }
