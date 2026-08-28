@@ -50,11 +50,11 @@ function openCamera(matchIndex, court) {
     const area = document.getElementById("cameraArea");
     area.style.display = "flex";
 
-    // ユーザー操作直後に getUserMedia を呼ぶ
     setTimeout(() => {
         startCamera();
     }, 0);
 }
+
 
 
 function openGroupCamera() {
@@ -64,11 +64,11 @@ function openGroupCamera() {
     const area = document.getElementById("cameraArea");
     area.style.display = "flex";
 
-    // スマホでユーザー操作扱いにするための遅延実行
     setTimeout(() => {
         startCamera();
     }, 0);
 }
+
 
 
 /* 5秒タイマー撮影 */
