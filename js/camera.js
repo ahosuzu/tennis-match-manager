@@ -50,10 +50,12 @@ function openCamera(matchIndex, court) {
     const area = document.getElementById("cameraArea");
     area.style.display = "flex";
 
+    // Android Chrome がユーザー操作扱いにするための遅延実行
     setTimeout(() => {
         startCamera();
     }, 0);
 }
+
 
 
 
@@ -68,6 +70,7 @@ function openGroupCamera() {
         startCamera();
     }, 0);
 }
+
 
 
 
