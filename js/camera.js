@@ -50,10 +50,13 @@ function openCamera(matchIndex, court) {
     const area = document.getElementById("cameraArea");
     area.style.display = "flex";
 
-    startCamera();
+    // ユーザー操作直後に getUserMedia を呼ぶ
+    setTimeout(() => {
+        startCamera();
+    }, 0);
 }
 
-/* 集合写真用カメラオープン */
+
 function openGroupCamera() {
     currentTargetMatch = "group";
     currentTargetCourt = "group";
@@ -61,8 +64,12 @@ function openGroupCamera() {
     const area = document.getElementById("cameraArea");
     area.style.display = "flex";
 
-    startCamera();
+    // スマホでユーザー操作扱いにするための遅延実行
+    setTimeout(() => {
+        startCamera();
+    }, 0);
 }
+
 
 /* 5秒タイマー撮影 */
 document.getElementById("captureBtn").onclick = () => {
