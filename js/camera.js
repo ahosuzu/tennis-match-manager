@@ -7,7 +7,9 @@ let countdownTimerId = null;
 /* インカメラ固定でカメラ起動 */
 async function startCamera() {
     if (stream) {
-        stream.getTracks().forEach(t => t.stop());
+        try {
+            stream.getTracks().forEach(t => t.stop());
+        } catch(e) {}
         stream = null;
     }
 
@@ -50,15 +52,10 @@ function openCamera(matchIndex, court) {
     const area = document.getElementById("cameraArea");
     area.style.display = "flex";
 
-    // Android Chrome がユーザー操作扱いにするための遅延実行
-    setTimeout(() => {
-        startCamera();
-    }, 0);
+    startCamera();  // ← setTimeout を削除
 }
 
-
-
-
+/* 集合写真用カメラオープン */
 function openGroupCamera() {
     currentTargetMatch = "group";
     currentTargetCourt = "group";
@@ -66,13 +63,8 @@ function openGroupCamera() {
     const area = document.getElementById("cameraArea");
     area.style.display = "flex";
 
-    setTimeout(() => {
-        startCamera();
-    }, 0);
+    startCamera();  // ← setTimeout を削除
 }
-
-
-
 
 /* 5秒タイマー撮影 */
 document.getElementById("captureBtn").onclick = () => {
@@ -129,7 +121,6 @@ function doCapture() {
     retakeBtn.style.display = "inline-block";
     confirmBtn.style.display = "inline-block";
 
-    // 試合カードへ一時反映（決定時に確定）
     if (currentTargetMatch !== null && currentTargetMatch !== "group") {
         const target = document.querySelector(
             `.matchPhotoPreview[data-match-index="${currentTargetMatch}"][data-court="${currentTargetCourt}"]`
@@ -146,7 +137,6 @@ function doCapture() {
         img.style.display = "block";
     }
 
-    // 試合写真が撮影された時点で試合開始扱い（シャッフル禁止）
     if (currentTargetMatch !== null && currentTargetMatch !== "group") {
         hasMatchStarted = true;
         lockShuffleIfStarted();
@@ -173,7 +163,7 @@ document.getElementById("retakeBtn").onclick = () => {
     countdown.style.display = "none";
     countdown.textContent = "";
 
-    startCamera();
+    startCamera();  // ← 直接呼ぶ
 };
 
 /* 決定（そのまま確定して閉じる） */
@@ -193,7 +183,9 @@ function closeCamera() {
     }
 
     if (stream) {
-        stream.getTracks().forEach(t => t.stop());
+        try {
+            stream.getTracks().forEach(t => t.stop());
+        } catch(e) {}
         stream = null;
     }
 
