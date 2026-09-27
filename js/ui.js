@@ -100,12 +100,17 @@ function renderMatchCards(template, members, matchResults) {
             /* ★★★ 撮影ボタン（ここが⑤の挿入場所） ★★★ */
             const photoBtn = document.createElement("button");
             photoBtn.textContent = `${court}コート写真📸`;
+            
             photoBtn.onclick = () => {
-                localStorage.setItem("targetMatch", matchIndex);
-                localStorage.setItem("targetCourt", court);
-                window.location.href = "camera.html";
+                currentTargetMatch = matchIndex;
+                currentTargetCourt = court;
+            
+                document.getElementById("cameraArea").style.display = "flex";
+                startCamera();  // ← ページ遷移なしで直接起動
             };
+            
             block.appendChild(photoBtn);
+
 
             /* 試合写真プレビュー */
             const preview = document.createElement("img");
