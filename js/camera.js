@@ -137,10 +137,12 @@ function doCapture() {
         img.style.display = "block";
     }
 
+    /* 
     if (currentTargetMatch !== null && currentTargetMatch !== "group") {
         hasMatchStarted = true;
         lockShuffleIfStarted();
     }
+    */
 }
 
 /* 取り直し */
